@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <TargetFrameworks>net472;netstandard2.0</TargetFrameworks>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <OutputPath>..\Package\Debug\PwshKeePass</OutputPath>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+        <OutputPath>..\Package\Release\PwshKeePass</OutputPath>
+    </PropertyGroup>
+    <ItemGroup>
+      <PackageReference Include="Hyak.Common" Version="1.2.2" />
+      <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+      <PackageReference Include="PowerShellStandard.Library" Version="5.1.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\KeePass2Core\KeePassLib\KeePassLibNetStd.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="SampleFiles\**" CopyToOutputDirectory="Always" />
+        <None Include="PowerShell.Tests\**" CopyToOutputDirectory="Always" />
+    </ItemGroup>
+
+</Project>

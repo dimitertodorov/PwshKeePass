@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PwshKeePass", "PwshKeePass\PwshKeePass.csproj", "{AEE28D68-C60D-4BC9-9620-FF63332E3F59}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PwshKeePass.Test", "PwshKeePass.Test\PwshKeePass.Test.csproj", "{60B31FED-6346-4B88-832F-65777B0C4F80}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeePassLibNetStd", "KeePass2Core\KeePassLib\KeePassLibNetStd.csproj", "{71BEA2E8-5839-440E-A1CF-C06A15279640}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AEE28D68-C60D-4BC9-9620-FF63332E3F59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEE28D68-C60D-4BC9-9620-FF63332E3F59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEE28D68-C60D-4BC9-9620-FF63332E3F59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEE28D68-C60D-4BC9-9620-FF63332E3F59}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60B31FED-6346-4B88-832F-65777B0C4F80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60B31FED-6346-4B88-832F-65777B0C4F80}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60B31FED-6346-4B88-832F-65777B0C4F80}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60B31FED-6346-4B88-832F-65777B0C4F80}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71BEA2E8-5839-440E-A1CF-C06A15279640}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71BEA2E8-5839-440E-A1CF-C06A15279640}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71BEA2E8-5839-440E-A1CF-C06A15279640}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71BEA2E8-5839-440E-A1CF-C06A15279640}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

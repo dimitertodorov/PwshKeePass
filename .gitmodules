@@ -1,0 +1,3 @@
+[submodule "KeePass2Core"]
+	path = KeePass2Core
+	url = https://github.com/Strangelovian/KeePass2Core.git

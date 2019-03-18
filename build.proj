@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="BuildAll" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <LibraryRoot>$(MSBuildThisFileDirectory)</LibraryRoot>
+        <LibraryToolsFolder>$(LibraryRoot)tools</LibraryToolsFolder>
+        <LibrarySourceFolder>$(LibraryRoot)src</LibrarySourceFolder>
+        <LibraryToolsFolder>$(LibraryRoot)tools</LibraryToolsFolder>
+        <PublishDirectory>$(LibraryRoot)\Publish</PublishDirectory>
+        <PackageDirectory>$(LibraryRoot)\Package</PackageDirectory>
+        <BuildOutputDirectory>$(PublishDirectory)\Build</BuildOutputDirectory>
+        <TestOutputDirectory>$(PublishDirectory)\TestResults</TestOutputDirectory>
+        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+        <NuGetPublishingSource Condition=" '$(NuGetPublishingSource)' == '' ">https://goclouddevops.pkgs.visualstudio.com/_packaging/gocloudpowershell-dev/nuget/v2</NuGetPublishingSource>
+        <Scope>All</Scope>
+    </PropertyGroup>
+    <PropertyGroup>
+        <NuGetCommand>$(MSBuildProjectDirectory)\tools\NuGet.exe</NuGetCommand>
+        <PowerShellCommand Condition=" '$(PowerShellCommand)' == '' ">C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe</PowerShellCommand>
+        <PowerShellCoreCommand Condition=" '$(PowerShellCoreCommand)' == '' ">pwsh</PowerShellCoreCommand>
+    </PropertyGroup>
+    <ItemGroup>
+        <CmdletProjectsToBuild
+                Include=".\PwshKeePass\PwshKeePass.csproj;"/>
+    </ItemGroup>
+    <PropertyGroup>
+        <ModuleDirectory>$(PackageDirectory)\Modules\PwshKeePass</ModuleDirectory>
+    </PropertyGroup>
+    <!-- Clean the build in all configurations -->
+    <Target Name="Clean">
+        <Message Importance="high" Text="Cleaning Cmdlets..." ContinueOnError="false"/>
+        <MSBuild
+                Projects="@(CmdletProjectsToBuild)"
+                Targets="Clean"
+                Properties="Configuration=$(Configuration);Platform=Any CPU"
+                ContinueOnError="false"/>
+        <!-- Delete the package files -->
+        <Message Importance="high" Text="Cleaning package files..." ContinueOnError="false"/>
+        <ItemGroup>
+            <PackageFiles Include="$(PackageDirectory)\**\*.*"/>
+        </ItemGroup>
+        <ItemGroup>
+            <ModuleFiles Include="$(ModuleDirectory)\**\*.*"/>
+        </ItemGroup>
+        <Delete
+                Files="@(PackageFiles)"
+                ContinueOnError="false"/>
+        <RemoveDir
+                Directories="$(PackageDirectory)"
+                ContinueOnError="false"/>
+        <Delete
+                Files="@(ModuleFiles)"
+                ContinueOnError="false"/>
+        <RemoveDir
+                Directories="$(ModuleDirectory)"
+                ContinueOnError="false"/>
+    </Target>
+    <Target Name="BuildAll" DependsOnTargets="Clean">
+        <CallTarget Targets="BuildFramework" />
+        <CallTarget Targets="BuildCore" />
+    </Target>
+    
+    <Target Name="BuildFramework">
+        <Message Importance="high" Text="Building Framework Cmdlets..."/>
+
+        <MakeDir Directories="$(PackageDirectory)"/>
+        <MakeDir Directories="$(ModuleDirectory)"/>
+
+        <MSBuild
+                Projects="@(CmdletProjectsToBuild)"
+                Targets="Publish"
+                Properties="Configuration=$(Configuration);Platform=Any CPU;TargetFramework=netstandard2.0"
+                BuildInParallel="$(BuildInParallel)"
+                ContinueOnError="false"/>
+        <MSBuild
+                Projects="@(CmdletProjectsToBuild)"
+                Targets="Publish"
+                Properties="Configuration=$(Configuration);Platform=Any CPU;TargetFramework=net472"
+                BuildInParallel="$(BuildInParallel)"
+                ContinueOnError="false"/>
+
+        <ItemGroup>
+            <FrameworkModuleInput Include="$(PackageDirectory)\$(Configuration)\PwshKeePass\net472\publish\**\*.*"/>
+        </ItemGroup>
+        <MakeDir Directories="$(ModuleDirectory)/PwshKeePass"/>
+
+
+        <Copy SourceFiles="@(FrameworkModuleInput)" DestinationFolder="$(ModuleDirectory)/PwshKeePass/%(RecursiveDir)" SkipUnchangedFiles="true"/>
+        <Copy SourceFiles="$(LibraryRoot)/PwshKeePass.psd1" DestinationFolder="$(ModuleDirectory)/PwshKeePass"/>
+        <!--<Exec Command="&quot;$(PowerShellCommand)&quot; -NonInteractive -NoLogo -NoProfile -Command &quot;. $(LibraryToolsFolder)\UpdateModules.ps1 $(Configuration) $(Scope) -Profile Latest &quot; " />-->
+    </Target>
+    <Target Name="BuildCore">
+        <Message Importance="high" Text="Building Core Cmdlets..."/>
+
+        <MakeDir Directories="$(PackageDirectory)"/>
+        <MakeDir Directories="$(ModuleDirectory)"/>
+
+        <MSBuild
+                Projects="@(CmdletProjectsToBuild)"
+                Targets="Publish"
+                Properties="Configuration=$(Configuration);Platform=Any CPU;TargetFramework=netstandard2.0"
+                BuildInParallel="$(BuildInParallel)"
+                ContinueOnError="false"/>
+
+        <MakeDir Directories="$(ModuleDirectory)/PwshKeePass.NetCore"/>
+
+        <ItemGroup>
+            <CoreModuleInput Include="$(PackageDirectory)\$(Configuration)\PwshKeePass\netstandard2.0\publish\**\*.*"/>
+        </ItemGroup>
+        <Copy SourceFiles="@(CoreModuleInput)" DestinationFolder="$(ModuleDirectory)/PwshKeePass.NetCore/%(RecursiveDir)" SkipUnchangedFiles="true"/>
+        <Copy SourceFiles="$(LibraryRoot)/PwshKeePass.NetCore.psd1" DestinationFolder="$(ModuleDirectory)/PwshKeePass.NetCore"/>
+    </Target>
+    <!-- Publish all packages -->
+    <Target Name="Publish">
+        <Message Importance="high" Text="Publishing PS Module to \&quot;$(NuGetPublishingSource)\&quot;"/>
+        <Error Condition=" '$(NuGetKey)' == '' " Text="You must provide the NuGetKey parameter to the build: /p:NuGetKey=YOUR_PUBLISHING_KEY"/>
+        <Exec Command="&quot;$(PowerShellCommand)&quot; -NonInteractive -NoLogo -NoProfile -Command &quot;. $(LibraryToolsFolder)\PublishModules.ps1 $(Configuration) $(Scope) $(NuGetKey) \&quot;$(NuGetPublishingSource)\&quot; -Profile Latest &quot; $(NuGetCommand)"/>
+    </Target>
+</Project>

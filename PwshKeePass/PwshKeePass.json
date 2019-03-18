@@ -1,0 +1,4 @@
+pwsh{
+        "GoCloudUri": "http://localhost:5000",
+        "BackChannelHttpProxy": "http://notrequired:nope@204.40.194.129:3128"
+        }
