@@ -1,4 +1,5 @@
 using System.Management.Automation;
+using KeePassLib.Interfaces;
 using PwshKeePass.Common;
 using PwshKeePass.Common.Extensions;
 using PwshKeePass.Model;
@@ -33,6 +34,11 @@ namespace PwshKeePass.Commands.Entry
             var entry = entryService.UpdateEntry(keePassPwEntry, Title, UserName, SecurePassword, Notes, Url,
                 IconName,
                 KeePassEntryGroupPath);
+            if (entry != null)
+            {
+                Connection.Save(new NullStatusLogger());
+            }
+
             if (PassThru)
             {
                 WriteObject(entry.ConvertToPsKeePassEntry());

@@ -16,23 +16,23 @@ namespace PwshKeePass.Service
 {
     public class EntryService : KeePassService
     {
-        private readonly PwDatabase _mConnection;
-        private readonly GroupService _groupService;
+        private readonly PwDatabase m_connection;
+        private readonly GroupService m_groupService;
 
         public EntryService(KeePassProfile keePassProfile, KeePassCmdlet keePassCmdlet, PwDatabase connection) : base(
             keePassProfile, keePassCmdlet)
         {
-            _mConnection = connection;
+            m_connection = connection;
             if (!connection.IsOpen)
                 throw new PSArgumentOutOfRangeException("Connection is not open.");
-            _groupService = new GroupService(keePassProfile, Cmdlet, _mConnection);
+            m_groupService = new GroupService(keePassProfile, Cmdlet, m_connection);
         }
 
         public List<PSKeePassEntry> GetEntry(string uuid, string title, string userName, string keePassEntryGroupPath)
         {
             List<PSKeePassEntry> entries = new List<PSKeePassEntry>();
 
-            foreach (var entry in _mConnection.RootGroup.GetEntries(true))
+            foreach (var entry in m_connection.RootGroup.GetEntries(true))
             {
                 if (!IsNullOrEmpty(title) & !entry.MatchFilter("Title", title))
                     continue;
@@ -47,7 +47,7 @@ namespace PwshKeePass.Service
                 entries.Add(pso);
             }
 
-            Cmdlet.WriteVerbose($"Enumerated {entries.Count} PwEntry from {_mConnection.Name}");
+            Cmdlet.WriteVerbose($"Enumerated {entries.Count} PwEntry from {m_connection.Name}");
             return entries;
         }
         
@@ -58,23 +58,23 @@ namespace PwshKeePass.Service
         {
             if (!IsNullOrEmpty(title))
             {
-                entry.Strings.Set("Title", new ProtectedString(_mConnection.MemoryProtection.ProtectTitle, title));
+                entry.Strings.Set("Title", new ProtectedString(m_connection.MemoryProtection.ProtectTitle, title));
             }
 
             if (!IsNullOrEmpty(userName))
             {
                 entry.Strings.Set("UserName",
-                    new ProtectedString(_mConnection.MemoryProtection.ProtectUserName, userName));
+                    new ProtectedString(m_connection.MemoryProtection.ProtectUserName, userName));
             }
 
             if (!IsNullOrEmpty(url))
             {
-                entry.Strings.Set("URL", new ProtectedString(_mConnection.MemoryProtection.ProtectUrl, url));
+                entry.Strings.Set("URL", new ProtectedString(m_connection.MemoryProtection.ProtectUrl, url));
             }
 
             if (!IsNullOrEmpty(notes))
             {
-                entry.Strings.Set("Notes", new ProtectedString(_mConnection.MemoryProtection.ProtectNotes, notes));
+                entry.Strings.Set("Notes", new ProtectedString(m_connection.MemoryProtection.ProtectNotes, notes));
             }
 
             if (!IsNullOrEmpty(iconName))
@@ -105,7 +105,7 @@ namespace PwshKeePass.Service
 
             if (!IsNullOrEmpty(keePassGroupPath))
             {
-                var group = _groupService.GetGroup(keePassGroupPath);
+                var newKeePassGroup = m_groupService.GetGroup(keePassGroupPath);
 
                 if (entry.ParentGroup != null)
                 {
@@ -115,8 +115,8 @@ namespace PwshKeePass.Service
                     }
                 }
 
-                group.KPGroup.AddEntry(entry, true, true);
-                group.KPGroup.Touch(true);
+                newKeePassGroup.KPGroup.AddEntry(entry, true, true);
+                newKeePassGroup.KPGroup.Touch(true);
             }
 
             return entry;
@@ -128,23 +128,23 @@ namespace PwshKeePass.Service
             var entry = new PwEntry(true, true);
 
             entry = UpdateEntry(entry, title, userName, keePassPassword, notes, url, iconName, keePassGroupPath);
-            _mConnection.Save(new NullStatusLogger());
+            m_connection.Save(new NullStatusLogger());
             return entry.ConvertToPsKeePassEntry();
         }
 
         public void RemoveEntry(PwEntry entry, bool noRecycle)
         {
-            var recycleBin = _groupService.GetRecycleBin();
+            var recycleBin = m_groupService.GetRecycleBin();
             if (recycleBin != null && !noRecycle)
             {
                 var deletedKeePassEntry = entry.CloneDeep();
                 deletedKeePassEntry.Uuid = new PwUuid(true);
                 recycleBin.AddEntry(deletedKeePassEntry, true);
-                _mConnection.Save(null);
+                m_connection.Save(null);
             }
 
             entry.ParentGroup.Entries.Remove(entry);
-            _mConnection.Save(null);
+            m_connection.Save(null);
         }
     }
 }

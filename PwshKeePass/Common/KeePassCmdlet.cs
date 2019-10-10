@@ -275,7 +275,7 @@ namespace PwshKeePass.Common
         }
 
         /// <summary>
-        /// Cmdlet begin process. Write to logs, setup Http Tracing and initialize profile
+        /// Cmdlet begin process. Setup KeePassProfile
         /// </summary>
         protected override void BeginProcessing()
         {

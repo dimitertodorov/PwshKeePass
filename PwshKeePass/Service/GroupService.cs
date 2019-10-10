@@ -10,12 +10,12 @@ namespace PwshKeePass.Service
 {
     public class GroupService : KeePassService
     {
-        private readonly PwDatabase _mConnection;
+        private readonly PwDatabase m_connection;
 
         public GroupService(KeePassProfile keePassProfile, KeePassCmdlet keePassCmdlet, PwDatabase connection) : base(
             keePassProfile, keePassCmdlet)
         {
-            _mConnection = connection;
+            m_connection = connection;
             if (!connection.IsOpen)
                 throw new PSArgumentOutOfRangeException("Connection is not open.");
         }
@@ -23,8 +23,8 @@ namespace PwshKeePass.Service
         public List<PSKeePassGroup> GetGroups()
         {
             var psKeePassGroups = new List<PSKeePassGroup>();
-            var groups = new List<PwGroup> {_mConnection.RootGroup};
-            groups.AddRange(_mConnection.RootGroup.GetFlatGroupList());
+            var groups = new List<PwGroup> {m_connection.RootGroup};
+            groups.AddRange(m_connection.RootGroup.GetFlatGroupList());
             foreach (var group in groups)
             {
                 var pso = group.ConvertToPsObject();
@@ -37,8 +37,8 @@ namespace PwshKeePass.Service
         public PSKeePassGroup GetGroup(string fullPath)
         {
             var entries = new List<PSKeePassGroup>();
-            var groups = new List<PwGroup> {_mConnection.RootGroup};
-            groups.AddRange(_mConnection.RootGroup.GetFlatGroupList());
+            var groups = new List<PwGroup> {m_connection.RootGroup};
+            groups.AddRange(m_connection.RootGroup.GetFlatGroupList());
 
             foreach (var group in groups)
             {
@@ -59,19 +59,19 @@ namespace PwshKeePass.Service
 
         public PwGroup GetRecycleBin()
         {
-            if (_mConnection.RecycleBinEnabled)
+            if (m_connection.RecycleBinEnabled)
             {
-                var recycleBin = _mConnection.RootGroup.FindGroup(_mConnection.RecycleBinUuid, true);
+                var recycleBin = m_connection.RootGroup.FindGroup(m_connection.RecycleBinUuid, true);
                 if (recycleBin == null)
                 {
                     recycleBin = new PwGroup(true, true, "Recycle Bin", PwIcon.TrashBin)
                     {
                         EnableAutoType = false, EnableSearching = false
                     };
-                    _mConnection.RootGroup.AddGroup(recycleBin, true);
-                    _mConnection.RecycleBinUuid = recycleBin.Uuid;
-                    _mConnection.Save(null);
-                    recycleBin = _mConnection.RootGroup.FindGroup(_mConnection.RecycleBinUuid, true);
+                    m_connection.RootGroup.AddGroup(recycleBin, true);
+                    m_connection.RecycleBinUuid = recycleBin.Uuid;
+                    m_connection.Save(null);
+                    recycleBin = m_connection.RootGroup.FindGroup(m_connection.RecycleBinUuid, true);
                 }
 
                 return recycleBin;
@@ -91,9 +91,9 @@ namespace PwshKeePass.Service
                 var updatedGroup = keePassGroup.CloneDeep();
                 updatedGroup.Uuid = new PwUuid(true);
                 parentGroup.KPGroup.AddGroup(updatedGroup, true, true);
-                _mConnection.Save(null);
+                m_connection.Save(null);
                 keePassGroup.ParentGroup.Groups.Remove(keePassGroup);
-                _mConnection.Save(null);
+                m_connection.Save(null);
                 keePassGroup = updatedGroup;
             }
 
@@ -104,7 +104,7 @@ namespace PwshKeePass.Service
 
             if (iconName != keePassGroup.IconId)
                 keePassGroup.IconId = iconName;
-            _mConnection.Save(null);
+            m_connection.Save(null);
             return keePassGroup.ConvertToPsObject();
         }
 
@@ -116,7 +116,7 @@ namespace PwshKeePass.Service
                 group.IconId = iconName;
             var parentGroup = GetGroup(keePassGroupParentPath);
             parentGroup.KPGroup.AddGroup(group, true);
-            _mConnection.Save(null);
+            m_connection.Save(null);
             return group.ConvertToPsObject();
         }
 
@@ -128,11 +128,11 @@ namespace PwshKeePass.Service
                 var deletedKeePassGroup = group.CloneDeep();
                 deletedKeePassGroup.Uuid = new PwUuid(true);
                 recycleBin.AddGroup(deletedKeePassGroup, true);
-                _mConnection.Save(null);
+                m_connection.Save(null);
             }
 
             group.ParentGroup.Groups.Remove(group);
-            _mConnection.Save(null);
+            m_connection.Save(null);
         }
     }
 }
